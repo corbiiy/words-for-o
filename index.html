@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Words for Oumnia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Kalam:wght@400;700&family=Marcellus&display=swap">
+<style>
+:root{
+  --wall:#EDF0F4; --ink:#15213B; --muted:#56627A; --line:#C5CCD8; --paper:#FFFFFF; --key:#DCE1EA;
+  --zellige:#1D7A5B; --saffron:#CF9612; --slate:#7A8496;
+  --cartier:#A5122A; --cartier-deep:#770B1C; --gold:#C9A24B;
+  --f-display:"Marcellus","Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --f-ui:"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-hand:"Kalam","Bradley Hand","Segoe Print",cursive;
+  --gap:6px;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.45;
+  background-color:var(--wall);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%2315213B' stroke-opacity='.055'%3E%3Crect x='20' y='20' width='24' height='24'/%3E%3Crect x='20' y='20' width='24' height='24' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+}
+button{font:inherit;color:inherit;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.app{position:relative;max-width:480px;margin:0 auto;height:100vh;height:100dvh;padding-inline:16px;display:flex;flex-direction:column;overflow:hidden}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+.center{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:22px;padding-block:28px;overflow-y:auto}
+
+.eyebrow{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.display{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(42px,12.5vw,60px);line-height:1;letter-spacing:-.01em;text-wrap:balance}
+.display em{font-style:normal;color:var(--cartier)}
+.display.sm{font-size:clamp(26px,7.6vw,34px);line-height:1.15}
+.lede{margin:0;font-size:17px;color:var(--muted);max-width:34ch;text-wrap:pretty}
+.small{margin:0;font-size:14px;color:var(--muted)}
+
+/* legend */
+.legend{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:15px}
+.legend li{display:flex;align-items:center;gap:12px;text-wrap:pretty}
+.mini{width:30px;height:30px;flex:none;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff;border-radius:3px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.14)}
+.is-correct{background:var(--zellige)}
+.is-present{background:var(--saffron)}
+.is-absent{background:var(--slate)}
+.is-secret{background:var(--cartier);box-shadow:inset 0 0 0 2px var(--gold)}
+
+/* buttons */
+.btn{appearance:none;border:0;cursor:pointer;border-radius:999px;padding:15px 26px;font-family:var(--f-ui);font-weight:700;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;white-space:nowrap;transition:transform .15s ease,background-color .15s ease,opacity .45s ease}
+.btn:active{transform:scale(.97)}
+.btn.later{visibility:hidden;opacity:0}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.cartier{background:var(--cartier);color:#fff;box-shadow:0 0 0 2px var(--wall),0 0 0 3.5px var(--gold)}
+.btn.ghost{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.link{background:none;border:0;padding:8px 4px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:14px}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+
+/* game header */
+.topbar{padding-top:14px;display:grid;gap:10px}
+.meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.chapter{margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.count{margin:0;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tray{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+/* empty sockets: a recessed spot in the tile wall, waiting for its red letter */
+.slot{width:16px;height:21px;flex:none;border-radius:2px;background:rgba(21,33,59,.07);box-shadow:inset 0 1px 2px rgba(21,33,59,.12);display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+.slot.got{background:var(--cartier);box-shadow:inset 0 0 0 1px var(--gold)}
+.tray-label{margin-left:8px;font-family:var(--f-hand);font-size:15px;line-height:1;color:var(--cartier)}
+.cluebox{padding-top:14px;display:grid;gap:4px}
+.clue{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(24px,6.8vw,30px);line-height:1.15;text-wrap:balance}
+.hint{margin:2px 0 0;white-space:pre-line;font-family:var(--f-hand);font-size:17px;line-height:1.3;color:var(--ink);text-wrap:pretty}
+
+/* board */
+.board-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding-block:10px}
+.board{--tile:48px;display:flex;flex-direction:column;gap:var(--gap)}
+.row{display:flex;gap:var(--gap);justify-content:center}
+.tile{width:var(--tile);height:var(--tile);display:grid;place-items:center;background:var(--paper);border:2px solid var(--line);border-radius:3px;font-weight:800;font-size:calc(var(--tile)*.5);line-height:1;color:var(--ink);user-select:none}
+.space{width:calc(var(--tile)*.35);flex:none;position:relative}
+.space::after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:var(--line);transform:translate(-50%,-50%)}
+.tile.filled{border-color:var(--ink);animation:pop .12s ease}
+.tile.correct,.tile.present,.tile.absent,.tile.secret{color:#fff;border-color:transparent;box-shadow:inset 0 calc(var(--tile)*-.07) 0 rgba(0,0,0,.14)}
+.tile.correct{background:var(--zellige)}
+.tile.present{background:var(--saffron)}
+.tile.absent{background:var(--slate)}
+.tile.secret{background:var(--cartier);box-shadow:inset 0 0 0 2px var(--gold);animation:glow 1s ease}
+.tile.flip{animation:flip .46s ease-in-out}
+.tile.bounce{animation:bounce .5s ease}
+.row.shake{animation:shake .4s ease}
+@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes flip{50%{transform:rotateX(90deg)}}
+@keyframes bounce{30%{transform:translateY(-22%)}60%{transform:translateY(4%)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes glow{40%{transform:scale(1.16)}}
+
+/* keyboard */
+.keyboard{display:grid;gap:7px;padding-block:6px 14px;user-select:none}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.kb-row.mid{padding-inline:5%}
+.key{flex:1 1 0;min-width:0;height:clamp(42px,7dvh,56px);border:0;border-radius:6px;background:var(--key);color:var(--ink);font-weight:700;font-size:16px;cursor:pointer;display:grid;place-items:center;padding:0;transition:background-color .2s}
+.key.wide{flex:1.6 1 0;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.key.correct{background:var(--zellige);color:#fff}
+.key.present{background:var(--saffron);color:#fff}
+.key.absent{background:var(--slate);color:#fff}
+
+/* note sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-radius:22px 22px 0 0;padding:22px 22px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -14px 40px rgba(21,33,59,.18);display:grid;gap:14px;transform:translateY(105%);visibility:hidden;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s linear .38s}
+.sheet.open{transform:none;visibility:visible;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.sheet-word{display:flex;flex-wrap:wrap;gap:3px;margin:0}
+.sheet-word .mt{width:26px;height:28px;display:grid;place-items:center;border-radius:3px;background:var(--zellige);color:#fff;font-weight:800;font-size:14px}
+.sheet-word .mt.sec{background:var(--cartier);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.sheet-word .sp{width:10px}
+.note{margin:0;font-family:var(--f-hand);font-size:21px;line-height:1.3;text-wrap:pretty}
+.sheet .btn{justify-self:start}
+
+.toast{position:absolute;left:50%;top:120px;z-index:30;transform:translate(-50%,-8px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.fly{position:fixed;z-index:60;display:grid;place-items:center;background:var(--cartier);color:#fff;font-family:var(--f-ui);font-weight:800;border-radius:3px;box-shadow:inset 0 0 0 2px var(--gold);transform-origin:0 0;transition:transform .75s cubic-bezier(.6,-.25,.3,1);pointer-events:none}
+
+/* reveal */
+.reveal .center{align-items:center;text-align:center}
+.scramble{--rs:22px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+.message{--rs:clamp(30px,10vw,44px);display:flex;flex-wrap:wrap;justify-content:center;gap:14px 20px}
+.mword{display:flex;gap:4px}
+.rslot{width:var(--rs);height:calc(var(--rs)*1.12);border-radius:3px;background:rgba(21,33,59,.07);box-shadow:inset 0 1px 3px rgba(21,33,59,.12)}
+.message.placed .rslot{background:transparent;box-shadow:none}
+.message.landed .rtile{animation:glow .6s ease}
+.rtile{width:var(--rs);height:calc(var(--rs)*1.12);display:grid;place-items:center;background:var(--cartier);color:#fff;font-weight:800;font-size:calc(var(--rs)*.52);line-height:1;border-radius:3px;box-shadow:inset 0 0 0 1.5px var(--gold);transform-origin:0 0}
+.punct{width:calc(var(--rs)*.3);font-family:var(--f-display);color:var(--cartier);font-size:calc(var(--rs)*.9);line-height:.9;text-align:center}
+
+/* letter */
+.paper{position:relative;background:var(--paper);padding:30px 24px 24px;border-radius:4px;box-shadow:0 1px 0 var(--line),0 22px 40px -22px rgba(21,33,59,.35);font-family:var(--f-hand);font-size:19px;line-height:1.45;display:grid;gap:12px}
+.paper p{margin:0;text-wrap:pretty}
+.paper .greet{font-size:24px}
+.paper .sign{text-align:right;color:var(--cartier)}
+.seal{position:absolute;top:-20px;right:20px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--cartier);color:#fff;font-family:var(--f-display);font-size:22px;box-shadow:inset 0 0 0 3px var(--cartier-deep),0 0 0 2px var(--gold)}
+.letter .btn{align-self:flex-start}
+
+/* question */
+.question .center{align-items:center;text-align:center;gap:14px}
+.question .display{font-size:clamp(30px,9vw,40px);line-height:1.1}
+.quip{margin:0;min-height:1.5em;font-family:var(--f-hand);font-size:21px;line-height:1.3;color:var(--ink)}
+.playground{position:relative;width:100%;height:clamp(220px,36dvh,320px)}
+.playground .btn{position:absolute;left:0;top:0;transform:scale(var(--s,1));transition:left .3s cubic-bezier(.3,1.4,.5,1),top .3s cubic-bezier(.3,1.4,.5,1),transform .25s ease}
+.playground .btn:active{transform:scale(calc(var(--s,1)*.97))}
+.playground.still .btn{transition:none}
+.gentle{position:absolute;inset:0;z-index:40;display:grid;place-items:center;padding-inline:16px;background:rgba(237,240,244,.88);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.gentle .paper{max-width:360px}
+.gentle .btn{justify-self:start}
+
+/* forgiven */
+.forgiven .center{align-items:flex-start}
+.kiss{margin:0;font-size:64px;line-height:1}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+
+/* entrances: each screen and each new clue arrives instead of snapping in */
+@keyframes enter{from{opacity:0;transform:translateY(12px)}}
+@keyframes fade{from{opacity:0}}
+.screen > .center,.clue.in,.board.in{animation:enter .55s cubic-bezier(.16,1,.3,1)}
+.topbar{animation:fade .4s ease}
+.gentle:not([hidden]){animation:fade .3s ease}
+.gentle .paper{animation:enter .5s cubic-bezier(.16,1,.3,1)}
+
+@media (max-height:680px){
+  .topbar{padding-top:8px;gap:6px}
+  .cluebox{padding-top:8px}
+  .clue{font-size:22px}
+  .center{gap:16px;padding-block:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <section class="screen" id="intro">
+    <div class="center">
+      <p class="eyebrow">Salé · September</p>
+      <h1 class="display">Hi, <em id="introName">Oumnia</em>.</h1>
+      <p class="lede">Someone made you a little word game. <span id="introCount">13</span> words, one clue each. No timer, no losing, and hints if you get stuck.</p>
+      <ul class="legend">
+        <li><span class="mini is-correct">A</span><span>Right letter, right spot</span></li>
+        <li><span class="mini is-present">U</span><span>In the word, wrong spot</span></li>
+        <li><span class="mini is-absent">G</span><span>Not in the word</span></li>
+        <li id="legendSecret"><span class="mini is-secret">S</span><span>A love letter. Every word hides one. Keep them.</span></li>
+      </ul>
+      <div class="actions">
+        <button class="btn primary" id="startBtn" type="button">Start</button>
+        <button class="link" id="resetBtn" type="button" hidden>Start over</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="game" hidden>
+    <header class="topbar">
+      <div class="meta"><p class="chapter" id="chapter"></p><p class="count" id="clueLabel"></p></div>
+      <div class="tray" id="tray" aria-label="Love letters collected"><span class="tray-label" id="trayLabel">love letters</span></div>
+    </header>
+    <div class="cluebox">
+      <h2 class="clue" id="clue"></h2>
+      <p class="hint" id="hint" hidden></p>
+    </div>
+    <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+    <div class="keyboard" id="keyboard"></div>
+    <div class="sheet" id="sheet" inert>
+      <p class="sheet-word" id="sheetWord"></p>
+      <p class="note" id="note"></p>
+      <button class="btn primary" id="nextBtn" type="button">Next word →</button>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="screen reveal" id="reveal" hidden>
+    <div class="center">
+      <p class="eyebrow" id="revealEyebrow">13 love letters</p>
+      <h2 class="display sm">You remember everything.<br>So remember this one.</h2>
+      <div class="scramble" id="scramble"></div>
+      <div class="message" id="message"></div>
+      <button class="btn primary later" id="toLetter" type="button">Keep going →</button>
+    </div>
+  </section>
+
+  <section class="screen letter" id="letter" hidden>
+    <div class="center">
+      <article class="paper">
+        <span class="seal" id="seal" aria-hidden="true">O</span>
+        <p class="greet" id="greet"></p>
+        <div id="letterBody" style="display:grid;gap:12px"></div>
+        <p class="sign" id="signature"></p>
+      </article>
+      <button class="btn primary" id="toQuestion" type="button">One last question →</button>
+    </div>
+  </section>
+
+  <section class="screen question" id="question" hidden>
+    <div class="center">
+      <p class="quip" id="q1"></p>
+      <h2 class="display" id="q2"></h2>
+      <p class="quip" id="quip" aria-live="polite"></p>
+      <div class="playground" id="playground">
+        <button class="btn cartier" id="yesBtn" type="button">I forgive him</button>
+        <button class="btn ghost" id="noBtn" type="button">I don't</button>
+      </div>
+    </div>
+    <div class="gentle" id="gentle" hidden>
+      <div class="paper">
+        <p class="greet">That's okay.</p>
+        <p>I'm not going anywhere. Take all the time you need, I'll keep trying 🥺</p>
+        <button class="btn primary" id="askAgain" type="button">Ask me again</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen forgiven" id="forgiven" hidden>
+    <div class="center">
+      <p class="kiss" aria-hidden="true">😘</p>
+      <h2 class="display">Thank you, <em id="thanksName">Oumnia</em>.</h2>
+      <p class="lede">The creator has been forgiven. He is very happy, and probably a little emotional.</p>
+      <div class="actions">
+        <a class="btn cartier" id="tellHim" href="https://wa.me/" target="_blank" rel="noopener">Tell him on WhatsApp</a>
+        <button class="btn ghost" id="moreKisses" type="button">More kisses 💋</button>
+      </div>
+      <p class="small">or just send him a screenshot 📸</p>
+    </div>
+  </section>
+
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<script>
+"use strict";
+/* ===================== EDIT THE WORDS HERE ===================== */
+const CONFIG = {
+  name: "Oumnia",
+  // One red letter is hidden in each word; together they spell this.
+  secret: "YOU'RE MY PERSON",
+  chapters: ["The cute part", "The part where I roast myself", "The honest part"],
+  words: [
+    { chapter: 0, clue: "The most important month of the year", answer: "AUGUST",
+      hint: "Your birthday month 🎂", note: "The month I met you, and the month you were born. Obviously the best one." },
+    { chapter: 0, clue: "Where the best chapter of my life started", answer: "TANGER",
+      hint: "The city where we met 🌊", note: "Tanger, in August. Best plot twist of my life." },
+    { chapter: 0, clue: "The color of my favorite view", answer: "BROWN",
+      hint: "Look at your eyes 👀", note: "Your eyes. Still my favorite view, even when they're mad at me." },
+    { chapter: 0, clue: "Your most wanted brand", answer: "CARTIER",
+      hint: "The red box with the gold edges 💍", note: "Expensive taste. That explains why you picked me 😌" },
+    { chapter: 1, clue: "What I clearly am right now", answer: "DUMB",
+      hint: "Four letters. Rhymes with thumb.", note: "Certified. No arguments from me this time." },
+    { chapter: 1, clue: "My strong defense in our fight", answer: "NOTHING",
+      hint: "Zero. Nada. Walou.", note: "I looked for a defense. My lawyer quit." },
+    { chapter: 1, clue: "The official peace treaty food", answer: "MACARON",
+      extra: "Hint: it's not chocolate 🍫", hint: "Small, round, French, pastel colors", note: "The only treaty I'd sign without reading 🤝" },
+    { chapter: 1, clue: "Correct answer to “are you mad?”", answer: "YES",
+      hint: "Three letters. You know it.", note: "And you have every right to be." },
+    { chapter: 2, clue: "What I should've done more of", answer: "HELP",
+      hint: "What you needed from me before I left", note: "The groceries before you got sick. The microwave for your family. I should have made the time, and I didn't." },
+    { chapter: 2, clue: "What you deserve, every single day", answer: "BETTER",
+      hint: "Opposite of worse", note: "Not only when it's easy for me. Every single day." },
+    { chapter: 2, clue: "What I felt when you went quiet", answer: "EMPTY",
+      hint: "The opposite of full", note: "Turns out I don't do well in a world where you're not talking to me." },
+    { chapter: 2, clue: "What this fight was never worth", answer: "LOSING YOU",
+      hint: "Two words. The worst thing that could happen to me.", note: "No trip, no meeting, no excuse is worth that." },
+    { chapter: 2, clue: "The only thing I'm sure of", answer: "OUMNIA",
+      hint: "It has something to do with your name 🤍", note: "Always has been. Always will be." }
+  ],
+  letter: [
+    "I wasn't there when you needed me. You got sick and I hadn't even done the groceries. I didn't help with the microwave for your family. And I said I'd tell you about my meeting, and then I didn't.",
+    "I know how many promises I've made. So I won't add new ones here. I'd rather show you.",
+    "I'm far away and I can't bring you anything right now, so I made you this, one word at a time."
+  ],
+  signature: "the creator ❤️",
+  question: ["I'm sorry. I hope you gave the app enough time.", "To thank the creator, you must forgive him."],
+  quips: ["Try again 😌", "Wrong button, Oumnia.", "Are you sure? Think about the macarons.", "The button disagrees with you.", "Please 🥺"],
+  giveUp: "Okay, okay. I'll stop running 🥺",
+  whatsapp: "I forgive you 😘"
+};
+/* =============================================================== */
+
+const MAX_ROWS = 6;
+const STORE = "words-for-oumnia-v1";
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s) => document.querySelector(s);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const WORDS = CONFIG.words.map((w) => {
+  const answer = w.answer.toUpperCase().trim();
+  return { ...w, answer, letters: answer.replace(/[^A-Z]/g, "") };
+});
+
+const SECRET = [];
+[...CONFIG.secret.toUpperCase()].forEach((ch, pos) => { if (/[A-Z]/.test(ch)) SECRET.push({ ch, pos }); });
+
+// Give every word exactly one letter of the secret (null if impossible -> feature hides itself).
+const ASSIGN = (() => {
+  if (SECRET.length !== WORDS.length) return null;
+  let seed = 815;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const order = SECRET.map((_, j) => j);
+  for (let i = order.length - 1; i > 0; i--) { const k = Math.floor(rand() * (i + 1)); [order[i], order[k]] = [order[k], order[i]]; }
+  const used = new Set(), out = [];
+  const go = (i) => {
+    if (i === WORDS.length) return true;
+    for (const j of order) {
+      if (!used.has(j) && WORDS[i].letters.includes(SECRET[j].ch)) {
+        used.add(j); out[i] = j;
+        if (go(i + 1)) return true;
+        used.delete(j);
+      }
+    }
+    return false;
+  };
+  return go(0) ? out : null;
+})();
+
+const fresh = () => ({ stage: "intro", level: 0, guesses: [] });
+let state = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE));
+    if (s && typeof s.level === "number" && s.level < WORDS.length && Array.isArray(s.guesses)) return s;
+  } catch (e) {}
+  return fresh();
+})();
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+
+let view = "intro", typed = "", busy = false, rows = [], rowEls = [], slots = [];
+const keyEls = {};
+const W = () => WORDS[state.level];
+const won = () => state.guesses.includes(W().letters);
+const finished = () => won() || state.guesses.length >= MAX_ROWS;
+const winRow = () => { const i = state.guesses.indexOf(W().letters); return i >= 0 ? i : MAX_ROWS - 1; };
+
+function score(g, a) {
+  const res = Array(a.length).fill("absent"), left = {};
+  for (let i = 0; i < a.length; i++) { if (g[i] === a[i]) res[i] = "correct"; else left[a[i]] = (left[a[i]] || 0) + 1; }
+  for (let i = 0; i < a.length; i++) { if (res[i] !== "correct" && left[g[i]] > 0) { res[i] = "present"; left[g[i]]--; } }
+  return res;
+}
+
+function buildKeyboard() {
+  const kb = $("#keyboard");
+  ["QWERTYUIOP", "ASDFGHJKL", "↵ZXCVBNM⌫"].forEach((line, r) => {
+    const row = document.createElement("div");
+    row.className = "kb-row" + (r === 1 ? " mid" : "");
+    [...line].forEach((ch) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "key";
+      if (ch === "↵") { b.textContent = "Enter"; b.classList.add("wide"); b.dataset.k = "ENTER"; }
+      else if (ch === "⌫") { b.textContent = "⌫"; b.classList.add("wide"); b.dataset.k = "BACK"; b.setAttribute("aria-label", "Delete"); }
+      else { b.textContent = ch; b.dataset.k = ch; keyEls[ch] = b; }
+      row.appendChild(b);
+    });
+    kb.appendChild(row);
+  });
+  kb.addEventListener("mousedown", (e) => { if (e.target.closest(".key")) e.preventDefault(); });
+  kb.addEventListener("click", (e) => {
+    const b = e.target.closest(".key"); if (!b) return;
+    if (b.dataset.k === "ENTER") submit(); else if (b.dataset.k === "BACK") back(); else type(b.dataset.k);
+  });
+}
+
+function buildTray() {
+  if (!ASSIGN) { $("#tray").hidden = true; $("#legendSecret").hidden = true; return; }
+  WORDS.forEach(() => { const s = document.createElement("span"); s.className = "slot"; $("#tray").insertBefore(s, $("#trayLabel")); slots.push(s); });
+}
+function fillSlot(slot, ch) { slot.textContent = ch; slot.classList.add("got"); }
+function renderTray() {
+  if (!ASSIGN) return;
+  slots.forEach((s, i) => {
+    const got = i < state.level || (i === state.level && finished());
+    s.textContent = got ? SECRET[ASSIGN[i]].ch : "";
+    s.classList.toggle("got", got);
+  });
+}
+
+function renderLevel() {
+  const w = W();
+  $("#chapter").textContent = CONFIG.chapters[w.chapter] || "";
+  $("#clueLabel").textContent = `${state.level + 1} of ${WORDS.length}`;
+  $("#clue").textContent = w.clue;
+  const board = $("#board");
+  [$("#clue"), board].forEach((el) => { el.classList.remove("in"); void el.offsetWidth; el.classList.add("in"); });
+  board.innerHTML = ""; rows = []; rowEls = [];
+  for (let r = 0; r < MAX_ROWS; r++) {
+    const row = document.createElement("div"); row.className = "row";
+    const tiles = [];
+    [...w.answer].forEach((c) => {
+      const el = document.createElement("span");
+      if (c === " ") el.className = "space"; else { el.className = "tile"; tiles.push(el); }
+      row.appendChild(el);
+    });
+    board.appendChild(row); rows.push(tiles); rowEls.push(row);
+  }
+  typed = "";
+  Object.values(keyEls).forEach((b) => b.classList.remove("correct", "present", "absent"));
+  state.guesses.forEach((g, r) => { const res = score(g, w.letters); paintRow(r, g, res); updateKeys(g, res); });
+  if (!won() && state.guesses.length >= MAX_ROWS) paintRow(MAX_ROWS - 1, w.letters, [...w.letters].map(() => "correct"));
+  updateHint();
+  renderTray();
+  closeSheet();
+  sizeTiles();
+  if (finished()) { markSecret(false); openSheet(); }
+}
+
+function sizeTiles() {
+  if (view !== "game") return;
+  const w = W(), wrap = $("#boardWrap"), gap = 6;
+  const n = w.letters.length, spaces = w.answer.length - n;
+  const byW = (wrap.clientWidth - (w.answer.length - 1) * gap) / (n + spaces * 0.35);
+  const byH = (wrap.clientHeight - 20 - (MAX_ROWS - 1) * gap) / MAX_ROWS;
+  const t = Math.max(22, Math.floor(Math.min(62, byW, byH)));
+  $("#board").style.setProperty("--tile", t + "px");
+}
+
+function paintRow(r, g, res) { rows[r].forEach((t, i) => { t.textContent = g[i]; t.className = "tile " + res[i]; }); }
+function paintTyped() {
+  const r = rows[state.guesses.length]; if (!r) return;
+  r.forEach((t, i) => { t.textContent = typed[i] || ""; t.classList.toggle("filled", Boolean(typed[i])); });
+}
+const canType = () => view === "game" && !busy && !finished();
+function type(ch) { if (!canType() || typed.length >= W().letters.length) return; typed += ch; paintTyped(); }
+function back() { if (!canType()) return; typed = typed.slice(0, -1); paintTyped(); }
+
+async function submit() {
+  if (!canType()) return;
+  const w = W(), r = state.guesses.length;
+  if (typed.length < w.letters.length) { shake(r); toast("Not enough letters"); return; }
+  busy = true;
+  const g = typed, res = score(g, w.letters);
+  typed = ""; state.guesses.push(g); save();
+  await flipRow(r, g, res);
+  updateKeys(g, res);
+  if (g === w.letters) {
+    await celebrateRow(r); await markSecret(true); openSheet();
+  } else if (state.guesses.length >= MAX_ROWS) {
+    toast("Okay, I'll give you this one 😘", 2200);
+    await wait(900);
+    await flipRow(MAX_ROWS - 1, w.letters, [...w.letters].map(() => "correct"));
+    await markSecret(true); openSheet();
+  } else {
+    if (state.guesses.length === 2) toast("Hint unlocked");
+    if (state.guesses.length === 4) toast("Extra hint unlocked");
+    updateHint();
+  }
+  busy = false;
+}
+
+async function flipRow(r, g, res) {
+  const tiles = rows[r];
+  if (reduceMotion) { paintRow(r, g, res); return; }
+  tiles.forEach((t, i) => setTimeout(() => {
+    t.classList.remove("flip"); void t.offsetWidth; t.classList.add("flip");
+    setTimeout(() => { t.textContent = g[i]; t.className = "tile flip " + res[i]; }, 230);
+  }, i * 120));
+  await wait(tiles.length * 120 + 480);
+  tiles.forEach((t) => t.classList.remove("flip"));
+}
+async function celebrateRow(r) {
+  if (reduceMotion) return;
+  rows[r].forEach((t, i) => setTimeout(() => t.classList.add("bounce"), i * 80));
+  await wait(rows[r].length * 80 + 520);
+  rows[r].forEach((t) => t.classList.remove("bounce"));
+}
+
+function markSecret(animate) {
+  if (!ASSIGN) return Promise.resolve();
+  const w = W(), s = SECRET[ASSIGN[state.level]], slot = slots[state.level];
+  const tile = rows[winRow()][w.letters.indexOf(s.ch)];
+  tile.className = "tile secret";
+  if (!animate || reduceMotion) { fillSlot(slot, s.ch); return Promise.resolve(); }
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const a = tile.getBoundingClientRect(), b = slot.getBoundingClientRect();
+      const fly = document.createElement("div");
+      fly.className = "fly"; fly.textContent = s.ch;
+      Object.assign(fly.style, { left: a.left + "px", top: a.top + "px", width: a.width + "px", height: a.height + "px", fontSize: a.height * 0.5 + "px" });
+      document.body.appendChild(fly);
+      let done = false;
+      const finish = () => { if (done) return; done = true; fly.remove(); fillSlot(slot, s.ch); resolve(); };
+      fly.getBoundingClientRect();
+      fly.style.transform = `translate(${b.left - a.left}px, ${b.top - a.top}px) scale(${b.width / a.width}, ${b.height / a.height})`;
+      fly.addEventListener("transitionend", finish, { once: true });
+      setTimeout(finish, 1100);
+    }, 550);
+  });
+}
+
+function openSheet() {
+  const w = W(), wordEl = $("#sheetWord");
+  wordEl.innerHTML = "";
+  const secretIdx = ASSIGN ? w.letters.indexOf(SECRET[ASSIGN[state.level]].ch) : -1;
+  let li = 0;
+  [...w.answer].forEach((c) => {
+    const s = document.createElement("span");
+    if (c === " ") s.className = "sp";
+    else { s.className = "mt" + (li === secretIdx ? " sec" : ""); s.textContent = c; li++; }
+    wordEl.appendChild(s);
+  });
+  wordEl.setAttribute("aria-label", w.answer);
+  $("#note").textContent = w.note;
+  const last = state.level === WORDS.length - 1, nx = WORDS[state.level + 1];
+  $("#nextBtn").textContent = last ? (ASSIGN ? "See what the letters say →" : "Keep going →")
+    : nx.chapter !== w.chapter ? `Next: ${(CONFIG.chapters[nx.chapter] || "").toLowerCase()} →` : "Next word →";
+  const sheet = $("#sheet");
+  sheet.inert = false; sheet.classList.add("open");
+  setTimeout(() => $("#nextBtn").focus({ preventScroll: true }), 400);
+}
+function closeSheet() { const sheet = $("#sheet"); sheet.classList.remove("open"); sheet.inert = true; }
+function nextWord() {
+  if (!$("#sheet").classList.contains("open")) return;
+  if (state.level < WORDS.length - 1) { state.level++; state.guesses = []; save(); renderLevel(); }
+  else { state.stage = ASSIGN ? "reveal" : "letter"; save(); show(state.stage); }
+}
+
+const RANK = { absent: 1, present: 2, correct: 3 };
+function updateKeys(g, res) {
+  [...g].forEach((c, i) => {
+    const b = keyEls[c]; if (!b) return;
+    const cur = ["correct", "present", "absent"].find((k) => b.classList.contains(k));
+    if (!cur || RANK[res[i]] > RANK[cur]) { b.classList.remove("correct", "present", "absent"); b.classList.add(res[i]); }
+  });
+}
+function updateHint() {
+  const w = W(), h = $("#hint"), wrong = state.guesses.filter((g) => g !== w.letters).length;
+  const lines = [];
+  if (w.extra) lines.push(w.extra);
+  if (wrong >= 2) lines.push("Hint: " + w.hint);
+  if (wrong >= 4) lines.push(`It starts with “${w.letters[0]}”`);
+  h.textContent = lines.join("\n");
+  h.hidden = lines.length === 0;
+}
+let toastTimer;
+function toast(msg, ms = 1400) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), ms);
+}
+function shake(r) { const el = rowEls[r]; if (!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || view !== "game") return;
+  if ($("#sheet").classList.contains("open")) { if (e.key === "Enter") { e.preventDefault(); nextWord(); } return; }
+  if (e.key === "Enter") { e.preventDefault(); submit(); }
+  else if (e.key === "Backspace") { e.preventDefault(); back(); }
+  else if (/^[a-z]$/i.test(e.key)) type(e.key.toUpperCase());
+});
+/* ---------- screens ---------- */
+function show(name) {
+  ["intro", "game", "reveal", "letter", "question", "forgiven"].forEach((s) => { $("#" + s).hidden = s !== name; });
+  view = name;
+  if (name === "game") renderLevel();
+  if (name === "reveal") runReveal();
+  if (name === "question") requestAnimationFrame(resetQuestion);
+  if (name === "forgiven") confetti();
+}
+
+/* ---------- reveal: the love letters unscramble ---------- */
+let revealTimers = [];
+function runReveal() {
+  revealTimers.forEach(clearTimeout); revealTimers = [];
+  const scr = $("#scramble"), msg = $("#message"), btn = $("#toLetter");
+  scr.innerHTML = ""; msg.innerHTML = ""; scr.hidden = false; btn.classList.add("later");
+  msg.classList.remove("placed", "landed");
+  const tiles = WORDS.map((_, i) => {
+    const s = SECRET[ASSIGN[i]], el = document.createElement("span");
+    el.className = "rtile"; el.textContent = s.ch; el.dataset.pos = s.pos;
+    scr.appendChild(el); return el;
+  });
+  let word = null;
+  [...CONFIG.secret.toUpperCase()].forEach((c, pos) => {
+    if (c === " ") { word = null; return; }
+    if (!word) { word = document.createElement("span"); word.className = "mword"; msg.appendChild(word); }
+    const el = document.createElement("span");
+    if (/[A-Z]/.test(c)) { el.className = "rslot"; el.dataset.pos = pos; } else { el.className = "punct"; el.textContent = c; }
+    word.appendChild(el);
+  });
+  msg.setAttribute("aria-label", CONFIG.secret);
+  const place = () => {
+    tiles.forEach((t) => msg.querySelector(`.rslot[data-pos="${t.dataset.pos}"]`).appendChild(t));
+    scr.hidden = true; msg.classList.add("placed");
+  };
+  if (reduceMotion) { place(); btn.classList.remove("later"); return; }
+  revealTimers.push(setTimeout(() => {
+    const first = tiles.map((t) => t.getBoundingClientRect());
+    place();
+    tiles.forEach((t, i) => {
+      const last = t.getBoundingClientRect(), f = first[i];
+      t.style.transition = "none";
+      t.style.transform = `translate(${f.left - last.left}px, ${f.top - last.top}px) scale(${f.width / last.width}, ${f.height / last.height})`;
+    });
+    document.body.getBoundingClientRect();
+    tiles.forEach((t, i) => { t.style.transition = `transform .9s cubic-bezier(.2,.8,.2,1) ${i * 70}ms`; t.style.transform = ""; });
+    revealTimers.push(setTimeout(() => {
+      // once every letter has landed, a small wave runs through the message in reading order
+      msg.querySelectorAll(".rtile").forEach((t, i) => { t.style.animationDelay = i * 45 + "ms"; });
+      msg.classList.add("landed");
+      btn.classList.remove("later");
+    }, 900 + tiles.length * 70));
+  }, 1700));
+}
+
+/* ---------- the question ---------- */
+const yesBtn = $("#yesBtn"), noBtn = $("#noBtn"), pg = $("#playground");
+let noCount = 0, lastDodge = 0;
+const isCalm = () => noBtn.classList.contains("calm");
+
+function resetQuestion() {
+  noCount = 0;
+  noBtn.classList.remove("calm"); noBtn.textContent = "I don't";
+  yesBtn.style.setProperty("--s", 1); noBtn.style.setProperty("--s", 1);
+  $("#quip").textContent = "";
+  pg.classList.add("still");
+  const w = pg.clientWidth, h = pg.clientHeight, yw = yesBtn.offsetWidth, nw = noBtn.offsetWidth, bh = yesBtn.offsetHeight;
+  if (yw + nw + 16 <= w) {
+    const x = (w - yw - nw - 16) / 2;
+    yesBtn.style.left = x + "px"; noBtn.style.left = x + yw + 16 + "px";
+    yesBtn.style.top = noBtn.style.top = (h - bh) / 2 + "px";
+  } else {
+    yesBtn.style.left = (w - yw) / 2 + "px"; noBtn.style.left = (w - nw) / 2 + "px";
+    yesBtn.style.top = h / 2 - bh - 8 + "px"; noBtn.style.top = h / 2 + 8 + "px";
+  }
+  pg.getBoundingClientRect();
+  pg.classList.remove("still");
+}
+
+function dodge() {
+  const now = Date.now();
+  if (now - lastDodge < 250) return;
+  lastDodge = now; noCount++;
+  yesBtn.style.setProperty("--s", (1 + Math.min(noCount, 6) * 0.06).toFixed(2));
+  if (noCount > CONFIG.quips.length) {
+    noBtn.classList.add("calm"); noBtn.textContent = "I don't (yet)";
+    noBtn.style.setProperty("--s", 0.92);
+    // the longer label can push it past the edge, so pull it back inside
+    noBtn.style.left = Math.max(0, Math.min(noBtn.offsetLeft, pg.clientWidth - noBtn.offsetWidth)) + "px";
+    $("#quip").textContent = CONFIG.giveUp;
+    return;
+  }
+  $("#quip").textContent = CONFIG.quips[noCount - 1];
+  noBtn.style.setProperty("--s", (1 - noCount * 0.05).toFixed(2));
+  const w = pg.clientWidth, h = pg.clientHeight, bw = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+  const y = { l: yesBtn.offsetLeft, t: yesBtn.offsetTop, r: yesBtn.offsetLeft + yesBtn.offsetWidth, b: yesBtn.offsetTop + yesBtn.offsetHeight };
+  const pad = 24, cx = noBtn.offsetLeft, cy = noBtn.offsetTop;
+  let spot = null;
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * Math.max(0, w - bw), yy = Math.random() * Math.max(0, h - bh);
+    const overlap = x < y.r + pad && x + bw > y.l - pad && yy < y.b + pad && yy + bh > y.t - pad;
+    if (overlap) continue;
+    if (Math.hypot(x - cx, yy - cy) > 90) { spot = [x, yy]; break; }
+    if (!spot) spot = [x, yy];
+  }
+  if (!spot) spot = [cx < w / 2 ? w - bw : 0, cy < h / 2 ? h - bh : 0];
+  noBtn.style.left = spot[0] + "px"; noBtn.style.top = spot[1] + "px";
+}
+
+noBtn.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && !isCalm()) dodge(); });
+noBtn.addEventListener("pointerdown", (e) => { if (isCalm()) return; e.preventDefault(); dodge(); });
+noBtn.addEventListener("click", () => {
+  if (Date.now() - lastDodge < 500) return;
+  if (isCalm()) { $("#gentle").hidden = false; $("#askAgain").focus(); } else dodge();
+});
+$("#askAgain").addEventListener("click", () => { $("#gentle").hidden = true; resetQuestion(); });
+yesBtn.addEventListener("click", () => { state.stage = "forgiven"; save(); show("forgiven"); });
+
+/* ---------- confetti + kisses ---------- */
+let confettiRun = 0;
+function confetti() {
+  if (reduceMotion) return;
+  const run = ++confettiRun, c = $("#confetti"), ctx = c.getContext("2d");
+  const dpr = Math.min(2, window.devicePixelRatio || 1), Wd = window.innerWidth, Ht = window.innerHeight;
+  c.width = Wd * dpr; c.height = Ht * dpr;
+  const colors = ["#A5122A", "#C9A24B", "#1D7A5B", "#CF9612", "#15213B"];
+  const kisses = ["😘", "💋", "❤️", "🥰"];
+  const parts = [];
+  for (let i = 0; i < 160; i++) {
+    const left = i % 2 === 0;
+    parts.push({ x: left ? -10 : Wd + 10, y: Ht * (0.55 + Math.random() * 0.3), vx: (left ? 1 : -1) * (3 + Math.random() * 10),
+      vy: -(8 + Math.random() * 12), w: 5 + Math.random() * 6, h: 8 + Math.random() * 8, r: Math.random() * 6,
+      vr: (Math.random() - 0.5) * 0.35, color: colors[i % colors.length] });
+  }
+  for (let i = 0; i < 44; i++) {
+    parts.push({ x: Math.random() * Wd, y: -30 - Math.random() * Ht, vx: (Math.random() - 0.5) * 1.2, vy: 1.6 + Math.random() * 2.4,
+      size: 22 + Math.random() * 18, r: (Math.random() - 0.5) * 0.6, vr: (Math.random() - 0.5) * 0.03, emoji: kisses[i % kisses.length] });
+  }
+  const start = performance.now();
+  let prev = start;
+  const frame = (now) => {
+    if (run !== confettiRun) return;
+    const dt = Math.min(2, (now - prev) / 16.67); prev = now;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, Wd, Ht);
+    let alive = 0;
+    for (const p of parts) {
+      if (p.emoji) { p.vy += 0.015 * dt; p.x += Math.sin((now + p.size * 97) / 600) * 0.4 * dt; }
+      else { p.vy += 0.28 * dt; p.vx *= 0.985; }
+      p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (p.y > Ht + 60) continue;
+      alive++;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      if (p.emoji) {
+        ctx.font = `${p.size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(p.emoji, 0, 0);
+      } else { ctx.fillStyle = p.color; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
+      ctx.restore();
+    }
+    if (alive && now - start < 12000) requestAnimationFrame(frame); else ctx.clearRect(0, 0, Wd, Ht);
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ---------- boot ---------- */
+buildKeyboard();
+buildTray();
+$("#introName").textContent = CONFIG.name;
+$("#thanksName").textContent = CONFIG.name;
+$("#introCount").textContent = WORDS.length;
+$("#revealEyebrow").textContent = `${WORDS.length} love letters`;
+$("#seal").textContent = CONFIG.name.charAt(0);
+$("#greet").textContent = CONFIG.name + ",";
+CONFIG.letter.forEach((t) => { const p = document.createElement("p"); p.textContent = t; $("#letterBody").appendChild(p); });
+$("#signature").textContent = CONFIG.signature;
+$("#q1").textContent = CONFIG.question[0];
+$("#q2").textContent = CONFIG.question[1];
+$("#tellHim").href = "https://wa.me/?text=" + encodeURIComponent(CONFIG.whatsapp);
+
+function refreshIntro() {
+  const started = state.stage !== "intro";
+  $("#startBtn").textContent = !started ? "Start" : state.stage === "game" ? `Continue · word ${state.level + 1} of ${WORDS.length}` : "Continue";
+  $("#resetBtn").hidden = !started;
+}
+$("#startBtn").addEventListener("click", () => {
+  if (state.stage === "intro") { state.stage = "game"; save(); }
+  show(state.stage);
+});
+$("#resetBtn").addEventListener("click", () => { state = fresh(); save(); refreshIntro(); });
+$("#nextBtn").addEventListener("click", nextWord);
+$("#toLetter").addEventListener("click", () => { state.stage = "letter"; save(); show("letter"); });
+$("#toQuestion").addEventListener("click", () => { state.stage = "question"; save(); show("question"); });
+$("#moreKisses").addEventListener("click", confetti);
+if (window.ResizeObserver) new ResizeObserver(sizeTiles).observe($("#boardWrap"));
+window.addEventListener("resize", () => { sizeTiles(); if (view === "question") resetQuestion(); });
+
+refreshIntro();
+show("intro");
+</script>
+</body>
+</html>
