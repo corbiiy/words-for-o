@@ -135,7 +135,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .message.placed .rslot{background:transparent;box-shadow:none}
 .message.landed .rtile{animation:glow .6s ease}
 .rtile{width:var(--rs);height:calc(var(--rs)*1.12);display:grid;place-items:center;background-color:var(--cartier);background-image:var(--sheen);color:#fff;font-weight:600;font-size:calc(var(--rs)*.5);line-height:1;border-radius:2px;outline:1px solid var(--gold);outline-offset:calc(var(--rs)*-.1);transform-origin:0 0}
-.secret-line{margin:0;font-family:var(--f-hand);font-size:21px;line-height:1.3;color:var(--cartier);text-wrap:balance;transition:opacity .6s ease}
+.secret-line{margin:0;white-space:pre-line;font-family:var(--f-hand);font-size:21px;line-height:1.3;color:var(--cartier);text-wrap:balance;transition:opacity .6s ease}
 .punct{width:calc(var(--rs)*.3);font-family:var(--f-display);font-weight:600;color:var(--cartier);font-size:calc(var(--rs)*.95);line-height:.9;text-align:center}
 
 /* letter: a white card with a thin gold frame */
@@ -286,15 +286,15 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 const CONFIG = {
   name: "Oumnia",
   // One red letter is hidden in each word; together they spell this.
-  secret: "YOU'RE MY PERSON",
+  secret: "YOU ARE MY WORLD",
   // Handwritten line that appears under the secret once it's spelled out.
-  secretLine: "Not only my person, but my favorite one.",
+  secretLine: "Even from far away,\nit still revolves around you.",
   chapters: ["The cute part", "The part where I roast myself", "The honest part"],
   words: [
     { chapter: 0, clue: "The most important month of the year", answer: "AUGUST",
-      hint: "Your birthday month 🎂", note: "The month I met you, and the month you were born. Obviously the best one." },
+      hint: "Your birthday month 🎂", note: "The month we officially got together, and the month you were born. Obviously the best one." },
     { chapter: 0, clue: "Where the best chapter of my life started", answer: "TANGER",
-      hint: "The city where we met 🌊", note: "Tanger, in August. Best plot twist of my life." },
+      hint: "The city where we got together 🌊", note: "Tanger, in August. Best plot twist of my life." },
     { chapter: 0, clue: "The color of my favorite view", answer: "BROWN",
       hint: "Look at your eyes 👀", note: "Your eyes. Still my favorite view, even when they're mad at me." },
     { chapter: 0, clue: "Your most wanted brand", answer: "CARTIER",
@@ -315,7 +315,7 @@ const CONFIG = {
       hint: "The opposite of full", note: "Turns out I don't do well in a world where you're not talking to me." },
     { chapter: 2, clue: "What this fight was never worth", answer: "LOSING YOU",
       hint: "Two words. The worst thing that could happen to me.", note: "No trip, no meeting, no excuse is worth that." },
-    { chapter: 2, clue: "The only thing I'm sure of", answer: "OUMNIA",
+    { chapter: 2, clue: "The only person I'm sure of", answer: "OUMNIA",
       hint: "It has something to do with your name 🤍", note: "Always has been. Always will be." }
   ],
   letter: [
